@@ -84,16 +84,21 @@
         letter-spacing: 0.2px;
       }
 
+      .show-controls.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
       .controls {
         position: absolute;
-        bottom: 14px;
-        left: 50%;
-        transform: translate(-50%, 8px);
-        width: min(92vw, 420px);
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        transform: translateY(-8px);
         background: var(--panel-bg);
         color: var(--panel-text);
         border-radius: 14px;
-        padding: 12px 14px 12px;
+        padding: 8px;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
         opacity: 0;
         pointer-events: none;
@@ -104,17 +109,17 @@
       .controls.visible {
         opacity: 1;
         pointer-events: auto;
-        transform: translate(-50%, 0);
+        transform: translateY(0);
       }
 
       .row {
         display: flex;
         gap: 8px;
-        margin-bottom: 10px;
+        margin-bottom: 0;
       }
 
       .btn {
-        flex: 1;
+        flex: 1 1 90px;
         border-radius: 10px;
         border: 1px solid var(--btn-border);
         background: var(--btn-bg);
@@ -127,51 +132,6 @@
       .btn.active {
         border-color: var(--accent);
         color: var(--accent);
-      }
-
-      .instructions {
-        font-size: 12px;
-        line-height: 1.35;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        padding-top: 8px;
-      }
-
-      body.dark-bg .instructions {
-        border-top-color: rgba(255, 255, 255, 0.2);
-      }
-
-      .instructions-title {
-        margin: 0 0 6px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-      }
-
-      .instructions-group {
-        margin-bottom: 8px;
-      }
-
-      .instructions-group:last-child {
-        margin-bottom: 0;
-      }
-
-      .instructions-label {
-        margin: 0 0 4px;
-        font-weight: 600;
-      }
-
-      .instructions ol {
-        margin: 0;
-        padding-left: 18px;
-      }
-
-      .instructions li {
-        margin-bottom: 4px;
-      }
-
-      .instructions li:last-child {
-        margin-bottom: 0;
       }
 
       .wake {
@@ -204,33 +164,13 @@
   <body>
     <main id="app" class="app">
       <img id="qr" src="images/qr.jpeg" alt="Driver camera QR code">
-      <button id="show-controls" class="show-controls" type="button" aria-expanded="false">Options</button>
+      <button id="open-controls" class="show-controls" type="button" aria-expanded="false">Options</button>
       <section id="controls" class="controls" aria-hidden="true">
         <div class="row">
           <button id="toggle-invert" class="btn" type="button" aria-pressed="false">Invert</button>
           <button id="toggle-bg" class="btn" type="button" aria-pressed="false">Background</button>
           <button id="reset" class="btn" type="button">Reset</button>
-        </div>
-        <div class="instructions">
-          <p class="instructions-title">Auto brightness shortcuts</p>
-          <div class="instructions-group">
-            <p class="instructions-label">iOS Shortcuts</p>
-            <ol>
-              <li>Shortcuts &gt; Automation &gt; + &gt; App.</li>
-              <li>Select "Driver Camera QR" and choose "Is Opened".</li>
-              <li>Add Action &gt; Set Brightness to 100%.</li>
-              <li>Optional: create another automation for "Is Closed" to restore brightness.</li>
-            </ol>
-          </div>
-          <div class="instructions-group">
-            <p class="instructions-label">Android automation</p>
-            <ol>
-              <li>Open an automation app (Modes and Routines, Tasker, MacroDroid).</li>
-              <li>Create a trigger for when "Driver Camera QR" opens.</li>
-              <li>Add action: set brightness to 100%.</li>
-              <li>Optional: add a close rule to restore brightness.</li>
-            </ol>
-          </div>
+          <button id="close-controls" class="btn" type="button">Close</button>
         </div>
       </section>
       <div id="wake" class="wake hidden">Tap once to keep the screen awake</div>
@@ -238,10 +178,11 @@
     <script>
       const qr = document.getElementById("qr");
       const controls = document.getElementById("controls");
-      const showControls = document.getElementById("show-controls");
+      const openControls = document.getElementById("open-controls");
       const toggleInvert = document.getElementById("toggle-invert");
       const toggleBg = document.getElementById("toggle-bg");
       const resetButton = document.getElementById("reset");
+      const closeControls = document.getElementById("close-controls");
       const wake = document.getElementById("wake");
 
       const STORAGE_KEY = "driverQrSettings";
@@ -260,8 +201,8 @@
       function applyControlsState(visible) {
         controls.classList.toggle("visible", visible);
         controls.setAttribute("aria-hidden", visible ? "false" : "true");
-        showControls.setAttribute("aria-expanded", visible ? "true" : "false");
-        showControls.textContent = visible ? "Close" : "Options";
+        openControls.classList.toggle("hidden", visible);
+        openControls.setAttribute("aria-expanded", visible ? "true" : "false");
       }
 
       function updateFilters() {
@@ -299,13 +240,14 @@
         }
       }
 
-      function toggleControls() {
-        state.controlsVisible = !state.controlsVisible;
+      function setControlsVisible(visible) {
+        state.controlsVisible = visible;
         applyControlsState(state.controlsVisible);
         saveSettings();
       }
 
-      showControls.addEventListener("click", toggleControls);
+      openControls.addEventListener("click", () => setControlsVisible(true));
+      closeControls.addEventListener("click", () => setControlsVisible(false));
 
       toggleInvert.addEventListener("click", () => {
         state.invert = !state.invert;
@@ -329,8 +271,7 @@
         setButtonState(toggleInvert, false);
         setButtonState(toggleBg, false);
         updateFilters();
-        applyControlsState(false);
-        saveSettings();
+        setControlsVisible(false);
       });
 
       loadSettings();
