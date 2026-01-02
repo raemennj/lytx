@@ -1,9 +1,19 @@
-﻿const CACHE_NAME = "qr-pwa-v1";
+﻿const CACHE_NAME = "qr-pwa-v2";
 const ASSETS = [
   "./",
   "index.html",
   "manifest.json",
-  "images/qr.jpeg"
+  "images/qr.jpeg",
+  "images/icons/icon-120.png",
+  "images/icons/icon-152.png",
+  "images/icons/icon-167.png",
+  "images/icons/icon-180.png",
+  "images/icons/icon-192.png",
+  "images/icons/icon-256.png",
+  "images/icons/icon-384.png",
+  "images/icons/icon-512.png",
+  "images/icons/icon-192-maskable.png",
+  "images/icons/icon-512-maskable.png"
 ];
 
 self.addEventListener("install", (event) => {
